@@ -25,24 +25,18 @@ android {
         }
     }
 
+
+
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+
 
             }
         debug {
             isMinifyEnabled = false
             // Add the API key here
-            val apiKeyWeather = project.findProperty("API_KEY_WEATHER") ?: ""
-            buildConfigField("String", "API_KEY_WEATHER", "\"${apiKeyWeather}\"")
 
-            // Add the API key here
-            val apiKeyNews = project.findProperty("API_KEY_NEWS") ?: ""
-            buildConfigField("String", "API_KEY_NEWS", "\"${apiKeyNews}\"")
         }
     }
     compileOptions {
