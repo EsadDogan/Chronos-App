@@ -1,9 +1,20 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.gms.google-services")
     alias(libs.plugins.google.firebase.crashlytics)
 }
+
+val localProperties = Properties().apply {
+    load(FileInputStream(rootProject.file("local.properties")))
+}
+
+val apiKeyWeatherNew: String = localProperties.getProperty("API_KEY_WEATHER_NEW") ?: ""
+val apiKeyNewsNew: String = localProperties.getProperty("API_KEY_NEWS_NEW") ?: ""
+
 
 android {
     namespace = "com.doganesad.chronosapp"
@@ -16,8 +27,12 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        buildConfigField("String", "API_KEY_WEATHER", "\"${project.findProperty("API_KEY_WEATHER") as String? ?: ""}\"")
-        buildConfigField("String", "API_KEY_NEWS", "\"${project.findProperty("API_KEY_NEWS") as String? ?: ""}\"")
+
+        // Inject the API keys into the BuildConfig class
+        buildConfigField("String", "API_KEY_WEATHER_NEW", "\"$apiKeyWeatherNew\"")
+        buildConfigField("String", "API_KEY_NEWS_NEW", "\"$apiKeyNewsNew\"")
+
+
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

@@ -20,7 +20,7 @@ object RetrofitInstanceWeather {
         .addInterceptor(Interceptor { chain ->
             val originalRequest = chain.request()
             val urlWithApiKey = originalRequest.url.newBuilder()
-                .addQueryParameter("appid", BuildConfig.API_KEY_WEATHER)
+                .addQueryParameter("appid", BuildConfig.API_KEY_WEATHER_NEW)
                 .build()
             val requestWithHeaders = originalRequest.newBuilder()
                 .url(urlWithApiKey)
@@ -42,7 +42,7 @@ object RetrofitInstanceWeather {
 
 object RetrofitInstanceNews {
 
-    private const val baseUrlWeather = "https://api.mediastack.com/v1/"
+    private const val baseUrlNews= "https://api.mediastack.com/v1/"
 
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(120, TimeUnit.SECONDS)
@@ -52,7 +52,7 @@ object RetrofitInstanceNews {
         .addInterceptor(Interceptor { chain ->
             val originalRequest = chain.request()
             val urlWithApiKey = originalRequest.url.newBuilder()
-                .addQueryParameter("access_key", BuildConfig.API_KEY_NEWS)
+                .addQueryParameter("access_key", BuildConfig.API_KEY_NEWS_NEW)
                 .build()
             val requestWithHeaders = originalRequest.newBuilder()
                 .url(urlWithApiKey)
@@ -63,7 +63,7 @@ object RetrofitInstanceNews {
 
     val apiNews: ApiServices by lazy {
         Retrofit.Builder()
-            .baseUrl(baseUrlWeather)
+            .baseUrl(baseUrlNews)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -94,7 +94,7 @@ object RetrofitInstancesDogFacts {
 
 object RetrofitInstancesCatFacts {
 
-    private const val baseUrlDogFacts = "https://cat-fact.herokuapp.com/"
+    private const val baseUrlCatFacts = "https://cat-fact.herokuapp.com/"
 
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(120, TimeUnit.SECONDS)
@@ -105,7 +105,7 @@ object RetrofitInstancesCatFacts {
 
     val apiCat: ApiServices by lazy {
         Retrofit.Builder()
-            .baseUrl(baseUrlDogFacts)
+            .baseUrl(baseUrlCatFacts)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

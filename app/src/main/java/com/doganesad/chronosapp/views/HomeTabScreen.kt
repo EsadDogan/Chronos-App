@@ -152,7 +152,7 @@ fun HomeTabScreen(mainViewModel: MainViewModel) {
             ) { targetTab ->
                 when (targetTab) {
                     0 -> HomeScreen(
-                        modifier = Modifier.padding(innerPadding).padding(bottom = 68.dp),
+                        modifier = Modifier.padding(innerPadding),
                         mainViewModel = mainViewModel
                     )
 

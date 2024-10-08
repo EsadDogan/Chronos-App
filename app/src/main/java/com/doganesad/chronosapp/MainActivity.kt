@@ -139,7 +139,7 @@ class MainActivity : ComponentActivity() {
 
         // Hide the navigation bar
         systemUiController.isNavigationBarVisible = false
-        systemUiController.isStatusBarVisible = false
+        systemUiController.isStatusBarVisible = true
 
 //        // Set navigation bar color
 //        systemUiController.setNavigationBarColor(

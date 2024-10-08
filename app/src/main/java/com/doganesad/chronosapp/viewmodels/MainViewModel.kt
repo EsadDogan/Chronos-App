@@ -40,22 +40,13 @@ class MainViewModel() : ViewModel() {
         lat = 52.237,
         lon = 21.0175,
         timezone = "Europe/Warsaw",
-        timezoneOffset = 7200,
         current = CurrentWeather(
-            dt = 1727476915,
-            sunrise = 1727497932,
-            sunset = 1727540441,
             temp = 14.21,
             feelsLike = 13.96,
-            pressure = 1005,
             humidity = 87,
-            dewPoint = 12.08,
-            uvi = 0,
             clouds = 100,
             visibility = 10000,
             windSpeed = 7.6,
-            windDeg = 240,
-            windGust = 0.0,
             weather = listOf(
                 WeatherCondition(
                     id = 501,
@@ -70,10 +61,13 @@ class MainViewModel() : ViewModel() {
 
     init {
         viewModelScope.launch {
+
+            Log.d("API_KEY_WEATHER", BuildConfig.API_KEY_WEATHER_NEW)
+            Log.d("API_KEY_NEWS", BuildConfig.API_KEY_NEWS_NEW)
             getCatFacts()
             getDogFacts()
             //Call weather from activity when location ready
-            //getWeather()
+            getWeather()
             checkNewsDataUptoDate(db)
         }
     }
