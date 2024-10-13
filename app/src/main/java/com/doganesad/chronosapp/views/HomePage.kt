@@ -1,136 +1,366 @@
 package com.doganesad.chronosapp.views
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.doganesad.chronosapp.R
-import com.doganesad.chronosapp.models.CatFact
-import com.doganesad.chronosapp.models.DogFact
+import com.doganesad.chronosapp.composables.CustomHtmlWebView
+import com.doganesad.chronosapp.composables.DogCatFactsPagerItem
+import com.doganesad.chronosapp.composables.NewsArticleCard
 import com.doganesad.chronosapp.viewmodels.MainViewModel
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
 
-    Column(modifier = modifier.padding(10.dp)) {
+    val verticalScrollState = rememberScrollState()
+
+    Column(
+        modifier = modifier
+            .verticalScroll(state = verticalScrollState)
+    ) {
         Text(
             text = "Good Afternoon Edwin",
-            modifier = Modifier.padding(top = 10.dp),
+            modifier = Modifier.padding(top = 10.dp, start = 10.dp, end = 10.dp),
             style = MaterialTheme.typography.displaySmall,
-            fontSize = 22.sp
+            fontSize = 23.sp,
+            maxLines = 1
         )
+
+        // DOG FACTS
 
         DogFact(
             modifier = Modifier
-                .padding(top = 20.dp)
+                .padding(top = 10.dp, start = 10.dp, end = 10.dp)
                 .fillMaxWidth(),
+            mainViewModel = mainViewModel
         )
+
+        // CAT FACTS
 
         CatFact(
             modifier = Modifier
-                .padding(top = 20.dp)
+                .padding(top = 10.dp, start = 10.dp, end = 10.dp)
+                .fillMaxWidth(),
+            mainViewModel = mainViewModel
+        )
+
+        // WEATHER
+
+        Text(
+            text = "Weather Today",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 20.dp, start = 10.dp, end = 10.dp)
+        )
+        WeatherCard(
+            modifier = Modifier
+                .padding(top = 10.dp, start = 10.dp, end = 10.dp)
+                .fillMaxWidth(), mainViewModel = mainViewModel
+        )
+
+        // PODCAST
+
+        Text(
+            text = "Featured Podcast",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 20.dp, start = 10.dp, end = 10.dp)
+        )
+        CustomHtmlWebView(modifier = Modifier.padding(top = 10.dp,start = 10.dp, end = 10.dp).height(160.dp) )
+
+
+        // SONG
+
+        Text(
+            text = "Featured Song",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 20.dp, start = 10.dp, end = 10.dp)
+        )
+        CustomHtmlWebView(modifier = Modifier.padding(top = 10.dp,start = 10.dp, end = 10.dp).height(160.dp), innerHeight = "220px", innerIframe = "<iframe style=\"border-radius:12px\" src=\"https://open.spotify.com/embed/track/5QO3UJc1gF1ummP75n2b3R?utm_source=generator\" width=\"100%\" height=\"352\" frameBorder=\"0\" allowfullscreen=\"\" allow=\"autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture\" loading=\"lazy\"></iframe>" )
+
+
+        Text(
+            text = "Featured Artist",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 20.dp, start = 10.dp, end = 10.dp)
+        )
+        CustomHtmlWebView(modifier = Modifier.padding(top = 10.dp,start = 10.dp, end = 10.dp).height(400.dp), innerHeight = "400px", innerIframe = "<iframe style=\"border-radius:12px\" src=\"https://open.spotify.com/embed/artist/6M2wZ9GZgrQXHCFfjv46we?utm_source=generator\" width=\"100%\" height=\"352\" frameBorder=\"0\" allowfullscreen=\"\" allow=\"autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture\" loading=\"lazy\"></iframe>" )
+
+
+
+
+
+
+        // NEWS
+
+        Text(
+            text = "News from World",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 20.dp, start = 10.dp, end = 10.dp)
+        )
+        if (mainViewModel.news.value.isNotEmpty()) {
+            // Compute the filtered and limited list once
+            val articlesWithImages = mainViewModel.news.value
+                .filter { it.image != null }
+                .take(20)
+
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                items(articlesWithImages.size) { index ->
+                    NewsArticleCard(article = articlesWithImages[index])
+                }
+            }
+        }
+
+    }
+
+}
+
+
+
+
+
+@Composable
+fun WeatherCard(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Text(
+                text = "How's the weather in ${mainViewModel.weatherResponse.value.timezone} today",
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            Row(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Ensure image has a proper size
+                Image(
+                    painter = rememberAsyncImagePainter(model = "https://openweathermap.org/img/wn/${mainViewModel.weatherResponse.value.current.weather.first().icon}@2x.png"),
+                    contentDescription = "Weather Icon",
+                    modifier = Modifier
+                        .size(84.dp) // Specify a size for the image
+                        .padding(end = 8.dp),
+                    contentScale = ContentScale.Fit
+                )
+
+                // Temperature text
+                Text(
+                    text = mainViewModel.weatherResponse.value.current.temp.toInt()
+                        .toString() + "°C",
+                    style = MaterialTheme.typography.displaySmall,
+                )
+
+                Column(modifier = Modifier.padding(start = 20.dp)) {
+                    Text(
+                        text = mainViewModel.weatherResponse.value.current.weather.first().main,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        text = mainViewModel.weatherResponse.value.current.weather.first().description,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        text = "Feels like: " + mainViewModel.weatherResponse.value.current.feelsLike.toInt()
+                            .toString(),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+
+                }
+            }
+        }
+
+    }
+}
+
+
+@Composable
+fun DogFact(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
+    val isExpanded = remember { mutableStateOf(false) }
+    Column(modifier = modifier) {
+
+        Card(
+            modifier = Modifier
                 .fillMaxWidth()
-        )
-
-    }
-
-}
-
-
-@Composable
-fun DogFact(modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(
-            topStart = 0.dp,
-            topEnd = 20.dp,
-            bottomEnd = 10.dp,
-            bottomStart = 10.dp
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-        colors = CardColors(
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
-            disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
-            disabledContentColor = MaterialTheme.colorScheme.onPrimary
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(5.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
+                .padding(top = 10.dp),
+            shape = RoundedCornerShape(
+                topStart = 0.dp,
+                topEnd = 20.dp,
+                bottomEnd = 10.dp,
+                bottomStart = 10.dp
+            ),
+//            colors = CardColors(
+//                containerColor = MaterialTheme.colorScheme.secondary,
+//                contentColor = MaterialTheme.colorScheme.onSecondary,
+//                disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
+//                disabledContentColor = MaterialTheme.colorScheme.onPrimary
+//            )
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.dog),
-                contentDescription = "dog",
-                modifier = Modifier.size(90.dp)
-            )
-            Column(modifier = Modifier.padding(horizontal = 10.dp)) {
-                Text(text = "Daily Dog facts", style = MaterialTheme.typography.bodyMedium)
-                Text(
-                    text = "Dogs Can Walk 800 Miles a Day",
-                    style = MaterialTheme.typography.bodySmall
+            Column {
+                Row(
+                    modifier = Modifier
+                        .padding(5.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.dog),
+                        contentDescription = "dog",
+                        modifier = Modifier.size(90.dp)
+                    )
+                    Column(
+                        modifier = Modifier.padding(horizontal = 10.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+                        Text(text = "Daily Dog facts", style = MaterialTheme.typography.bodyMedium)
+
+                    }
+                    Icon(
+                        imageVector = if (isExpanded.value) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = "expand",
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .clickable {
+                                isExpanded.value = !isExpanded.value
+                            }
+                    )
+
+                }
+            }
+            AnimatedVisibility(visible = isExpanded.value) {
+                DogCatFactsPagerItem(
+                    list = mainViewModel.dogFacts.value.map { it.attributes.body },
+                    modifier = Modifier.padding(top = 10.dp)
                 )
             }
-        }
 
+
+        }
     }
 }
 
 @Composable
-fun CatFact(modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(
-            topStart = 0.dp,
-            topEnd = 20.dp,
-            bottomEnd = 10.dp,
-            bottomStart = 10.dp
-        ),
-        colors = CardColors(
-            containerColor = MaterialTheme.colorScheme.secondary,
-            contentColor = MaterialTheme.colorScheme.onSecondary,
-            disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
-            disabledContentColor = MaterialTheme.colorScheme.onPrimary
-        )
-    ) {
-        Row(
+fun CatFact(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
+    val isExpanded = remember { mutableStateOf(false) }
+    Column(modifier = modifier) {
+
+        Card(
             modifier = Modifier
-                .padding(5.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
+                .fillMaxWidth()
+                .padding(top = 10.dp),
+            shape = RoundedCornerShape(
+                topStart = 0.dp,
+                topEnd = 20.dp,
+                bottomEnd = 10.dp,
+                bottomStart = 10.dp
+            ),
+//            colors = CardColors(
+//                containerColor = MaterialTheme.colorScheme.secondary,
+//                contentColor = MaterialTheme.colorScheme.onSecondary,
+//                disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
+//                disabledContentColor = MaterialTheme.colorScheme.onPrimary
+//            )
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.scratch),
-                contentDescription = "cat",
-                modifier = Modifier.size(90.dp)
-            )
-            Column(modifier = Modifier.padding(horizontal = 10.dp)) {
-                Text(text = "Daily Cat facts", style = MaterialTheme.typography.bodyMedium)
-                Text(
-                    text = "Cats can jump higher than 72 inches",
-                    style = MaterialTheme.typography.bodySmall
+            Column {
+                Row(
+                    modifier = Modifier
+                        .padding(5.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.scratch),
+                        contentDescription = "cat",
+                        modifier = Modifier.size(90.dp)
+                    )
+                    Column(
+                        modifier = Modifier.padding(horizontal = 10.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+                        Text(text = "Daily Cat facts", style = MaterialTheme.typography.bodyMedium)
+
+                    }
+                    Icon(
+                        imageVector = if (isExpanded.value) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Previous",
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .clickable {
+                                isExpanded.value = !isExpanded.value
+                            }
+                    )
+
+                }
+            }
+            AnimatedVisibility(visible = isExpanded.value) {
+                DogCatFactsPagerItem(
+                    list = mainViewModel.catFacts.value.map { it.text },
+                    modifier = Modifier.padding(top = 10.dp)
                 )
             }
-        }
 
+
+        }
     }
+
 }
+
+
+
+
+
+

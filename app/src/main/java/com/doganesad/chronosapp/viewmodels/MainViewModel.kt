@@ -1,12 +1,13 @@
 package com.doganesad.chronosapp.viewmodels
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.doganesad.chronosapp.BuildConfig
 import com.doganesad.chronosapp.api.RetrofitInstanceNews
+import com.doganesad.chronosapp.api.RetrofitInstancePexels
 import com.doganesad.chronosapp.api.RetrofitInstanceWeather
 import com.doganesad.chronosapp.api.RetrofitInstancesCatFacts
 import com.doganesad.chronosapp.api.RetrofitInstancesDogFacts
@@ -14,6 +15,7 @@ import com.doganesad.chronosapp.models.CatFact
 import com.doganesad.chronosapp.models.CurrentWeather
 import com.doganesad.chronosapp.models.DogFact
 import com.doganesad.chronosapp.models.NewsArticle
+import com.doganesad.chronosapp.models.Photo
 import com.doganesad.chronosapp.models.RainVolume
 import com.doganesad.chronosapp.models.WeatherCondition
 import com.doganesad.chronosapp.models.WeatherResponse
@@ -59,18 +61,50 @@ class MainViewModel() : ViewModel() {
         )
     )
 
+    val emptyWeatherResponse = WeatherResponse(
+        lat = 0.0,
+        lon = 0.0,
+        timezone = "",
+        current = CurrentWeather(
+            temp = 14.21,
+            feelsLike = 13.96,
+            humidity = 87,
+            clouds = 100,
+            visibility = 10000,
+            windSpeed = 7.6,
+            weather = listOf(
+                WeatherCondition(
+                    id = 501,
+                    main = "Rain",
+                    description = "moderate rain",
+                    icon = "10n"
+                )
+            ),
+            rain = RainVolume(oneHour = 1.78)
+        )
+    )
+
+    val weatherResponse = mutableStateOf(emptyWeatherResponse)
+    val catFacts = mutableStateOf(emptyList<CatFact>())
+    val dogFacts = mutableStateOf(emptyList<DogFact>())
+    val news = mutableStateOf(emptyList<NewsArticle>())
+    val curratedPhotos = mutableStateOf(emptyList<Photo>())
+
+
+
     init {
         viewModelScope.launch {
 
-            Log.d("API_KEY_WEATHER", BuildConfig.API_KEY_WEATHER_NEW)
-            Log.d("API_KEY_NEWS", BuildConfig.API_KEY_NEWS_NEW)
             getCatFacts()
             getDogFacts()
+            getCuratedPhotos()
             //Call weather from activity when location ready
             getWeather()
             checkNewsDataUptoDate(db)
         }
     }
+
+
 
 
 
@@ -94,31 +128,33 @@ class MainViewModel() : ViewModel() {
 
     private fun checkNewsDataUptoDate(db: FirebaseFirestore) {
 
-        val news = mutableListOf<NewsArticle>()
+        val newsResponse = mutableListOf<NewsArticle>()
 
         try {
             db.collection("news")
                 .get()
                 .addOnSuccessListener { result ->
                     for (document in result) {
-                        news.add(document.toObject(NewsArticle::class.java))
+                        newsResponse.add(document.toObject(NewsArticle::class.java))
                     }
-                    Log.d(TAG, "checkNewsDataUptoDate: $news")
+                    Log.d(TAG, "checkNewsDataUptoDate: $newsResponse")
                 }
                 .addOnFailureListener { exception ->
                     Log.w(TAG, "Error getting documents.", exception)
                 }.addOnCompleteListener {
 
-                    if (news.isNotEmpty()) {
-                        val publishedAt = news.first().publishedAt
-                        val isOneDayLater = isOneDayLater(publishedAt)
+                    if (newsResponse.isNotEmpty()) {
+                        val publishedAt = newsResponse.first().publishedAt
+                        val isOneDayLater = if(BuildConfig.DEBUG) false else isOneDayLater(publishedAt)
 
                         println("Is one day later: $isOneDayLater")
 
-                        if (isOneDayLater) {
+                        if (isOneDayLater ) {
                             viewModelScope.launch(Dispatchers.IO) {
                                 getNewsAndUploadToDB(db)
                             }
+                        }else{
+                            news.value = newsResponse
                         }
 
 
@@ -154,6 +190,8 @@ class MainViewModel() : ViewModel() {
                     }
             }
 
+            news.value = response.data
+
 
             Log.d(TAG, "getNews: $response")
         } catch (e: Exception) {
@@ -165,15 +203,22 @@ class MainViewModel() : ViewModel() {
 
 
     private suspend fun getDogFacts() {
-        val dogFacts = mutableListOf<DogFact>()
-
-
         try {
             val response = RetrofitInstancesDogFacts.apiDog.getDogFacts(5)
+
+            // Create a new mutable list from the current state
+            val updatedList = dogFacts.value.toMutableList()
+
+            // Add new facts to the list
             response.data.forEach {
-                dogFacts.add(it)
+                updatedList.add(it)
             }
-            Log.d(TAG, "getDogFacts: $dogFacts ")
+
+            // Assign the updated list back to dogFacts.value
+            dogFacts.value = updatedList
+
+            Log.d(TAG, "getDogFacts: ${response}")
+            Log.d(TAG, "getDogFacts: ${dogFacts.value}")
 
         } catch (e: Exception) {
             Log.d(TAG, "getDogFacts: error" + e.message)
@@ -182,17 +227,22 @@ class MainViewModel() : ViewModel() {
 
 
     private suspend fun getCatFacts() {
-        val catFacts = mutableListOf<CatFact>()
 
         try {
             val response = RetrofitInstancesCatFacts.apiCat.getCatFacts(100)
+
+            val updatedList = catFacts.value.toMutableList()
+
             response.forEach {
                 if (it.status.verified == true) {
-                    catFacts.add(it)
+                    updatedList.add(it)
                 }
             }
-            Log.d(TAG, "getCatFacts: $catFacts ")
-            Log.d(TAG, "getCatFacts: ${catFacts.size} ")
+
+            catFacts.value = updatedList
+
+            Log.d(TAG, "getCatFacts: ${catFacts.value} ")
+            Log.d(TAG, "getCatFacts: ${catFacts.value.size} ")
         } catch (e: Exception) {
             Log.d(TAG, "getCatFacts: error: ${e.message}")
         }
@@ -204,9 +254,10 @@ class MainViewModel() : ViewModel() {
 
         try {
             val response = if (BuildConfig.DEBUG) {
-                dummyWeatherResponse
+               weatherResponse.value = dummyWeatherResponse
             } else {
-                RetrofitInstanceWeather.apiWeather.getWeatherData(
+
+                weatherResponse.value = RetrofitInstanceWeather.apiWeather.getWeatherData(
                     lat = 52.237049,
                     lon = 21.017532,
                     units = "metric"
@@ -221,6 +272,25 @@ class MainViewModel() : ViewModel() {
 
 
     }
+
+
+    private suspend fun getCuratedPhotos() {
+        try {
+
+            val response = RetrofitInstancePexels.apiPexels.getCuratedPhotos(
+                    page = 1,
+                    perPage = 10,
+                )
+
+           curratedPhotos.value = response.photos
+            Log.d(TAG, "getCuratedPhotos: curratedPhotosSize" + curratedPhotos.value.size)
+
+            Log.d(TAG, "getCuratedPhotos: $response")
+        } catch (e: Exception) {
+            Log.d(TAG, "getCuratedPhotos: error " + e.message)
+        }
+    }
+
 
 
 }

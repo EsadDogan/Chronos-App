@@ -39,6 +39,35 @@ object RetrofitInstanceWeather {
     }
 }
 
+object RetrofitInstancePexels {
+
+    private const val baseUrlPexels = "https://api.pexels.com/v1/"
+
+    private val okHttpClient = OkHttpClient.Builder()
+        .connectTimeout(120, TimeUnit.SECONDS)
+        .readTimeout(120, TimeUnit.SECONDS)
+        .writeTimeout(120, TimeUnit.SECONDS)
+        .addInterceptor(RetryInterceptor(maxRetry = 7))
+        .addInterceptor { chain ->
+            val originalRequest = chain.request()
+            val requestWithHeaders = originalRequest.newBuilder()
+                .addHeader("Authorization", BuildConfig.API_KEY_PEXELS)
+                .build()
+            chain.proceed(requestWithHeaders)
+        }
+        .build()
+
+    val apiPexels: ApiServices by lazy {
+        Retrofit.Builder()
+            .baseUrl(baseUrlPexels)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(ApiServices::class.java)
+    }
+}
+
+
 
 object RetrofitInstanceNews {
 

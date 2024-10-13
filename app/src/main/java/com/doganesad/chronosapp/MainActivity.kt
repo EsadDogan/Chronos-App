@@ -139,7 +139,7 @@ class MainActivity : ComponentActivity() {
 
         // Hide the navigation bar
         systemUiController.isNavigationBarVisible = false
-        systemUiController.isStatusBarVisible = true
+        systemUiController.isStatusBarVisible = false
 
 //        // Set navigation bar color
 //        systemUiController.setNavigationBarColor(
@@ -147,10 +147,10 @@ class MainActivity : ComponentActivity() {
 //            darkIcons = useDarkIcons
 //        )
 //
-//        systemUiController.setStatusBarColor(
-//            color = MaterialTheme.colorScheme.surface, // Replace with your desired color
-//            darkIcons = useDarkIcons
-//        )
+        systemUiController.setStatusBarColor(
+            color = colorResource(id = R.color.transparent_high), // Replace with your desired color
+            darkIcons = useDarkIcons
+        )
 
         val navController = rememberNavController()
         mainViewModel.navController = navController

@@ -14,6 +14,7 @@ val localProperties = Properties().apply {
 
 val apiKeyWeatherNew: String = localProperties.getProperty("API_KEY_WEATHER_NEW") ?: ""
 val apiKeyNewsNew: String = localProperties.getProperty("API_KEY_NEWS_NEW") ?: ""
+val apiKeyPexels: String = localProperties.getProperty("API_KEY_PEXELS") ?: ""
 
 
 android {
@@ -31,6 +32,7 @@ android {
         // Inject the API keys into the BuildConfig class
         buildConfigField("String", "API_KEY_WEATHER_NEW", "\"$apiKeyWeatherNew\"")
         buildConfigField("String", "API_KEY_NEWS_NEW", "\"$apiKeyNewsNew\"")
+        buildConfigField("String", "API_KEY_PEXELS", "\"$apiKeyPexels\"")
 
 
 
@@ -112,5 +114,7 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.8.2")
     implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation("com.google.accompanist:accompanist-pager:0.30.0")
+
 
 }

@@ -2,10 +2,12 @@ package com.doganesad.chronosapp.api
 
 
 import com.doganesad.chronosapp.models.CatFact
+import com.doganesad.chronosapp.models.CuratedPhotosResponse
 import com.doganesad.chronosapp.models.DogFactResponse
 import com.doganesad.chronosapp.models.NewsResponse
 import com.doganesad.chronosapp.models.WeatherResponse
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Query
 
 interface ApiServices {
@@ -24,6 +26,12 @@ interface ApiServices {
         @Query("lon") lon: Double,
         @Query("units") units: String = "metric"
     ): WeatherResponse
+
+    @GET("curated")
+    suspend fun getCuratedPhotos(
+        @Query("page") page: Int,
+        @Query("per_page") perPage: Int,
+    ): CuratedPhotosResponse
 
 
     // GET DAILY DOG FACTS

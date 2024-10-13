@@ -23,7 +23,7 @@ val bodyFontFamily = FontFamily(
 
 val displayFontFamily = FontFamily(
     Font(
-        googleFont = GoogleFont("Libre Franklin"),
+        googleFont = GoogleFont("Merriweather"),
         fontProvider = provider,
     )
 )
