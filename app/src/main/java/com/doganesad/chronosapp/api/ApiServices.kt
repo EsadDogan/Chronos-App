@@ -33,6 +33,13 @@ interface ApiServices {
         @Query("per_page") perPage: Int,
     ): CuratedPhotosResponse
 
+    @GET("search")
+    suspend fun getSearchPhotos(
+        @Query("page") page: Int,
+        @Query("per_page") perPage: Int,
+        @Query("query") query: String
+    ): CuratedPhotosResponse
+
 
     // GET DAILY DOG FACTS
     @GET("facts")

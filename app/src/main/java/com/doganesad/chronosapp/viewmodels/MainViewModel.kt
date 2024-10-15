@@ -35,6 +35,8 @@ class MainViewModel() : ViewModel() {
 
     lateinit var navController: NavHostController
 
+    val searchBarText = mutableStateOf("")
+
 
     private val db = Firebase.firestore
 
@@ -93,7 +95,10 @@ class MainViewModel() : ViewModel() {
 
 
     init {
+
+        Log.d(TAG, "main: init called ")
         viewModelScope.launch {
+            Log.d(TAG, "main: init called 2")
 
             getCatFacts()
             getDogFacts()
@@ -167,6 +172,24 @@ class MainViewModel() : ViewModel() {
 
 
 
+    }
+
+    suspend fun searchForImage() {
+        try {
+
+            val response = RetrofitInstancePexels.apiPexels.getSearchPhotos(
+                page = 1,
+                perPage = 30,
+                query = searchBarText.value
+            )
+
+            curratedPhotos.value = response.photos
+            Log.d(TAG, "getCuratedPhotos: searchedPhotosSize" + curratedPhotos.value.size)
+
+            Log.d(TAG, "getCuratedPhotos: $response")
+        } catch (e: Exception) {
+            Log.d(TAG, "getCuratedPhotos: error " + e.message)
+        }
     }
 
 
@@ -274,12 +297,12 @@ class MainViewModel() : ViewModel() {
     }
 
 
-    private suspend fun getCuratedPhotos() {
+    suspend fun getCuratedPhotos() {
         try {
 
             val response = RetrofitInstancePexels.apiPexels.getCuratedPhotos(
                     page = 1,
-                    perPage = 10,
+                    perPage = 30,
                 )
 
            curratedPhotos.value = response.photos
