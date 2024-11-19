@@ -19,6 +19,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,8 +49,10 @@ import com.doganesad.chronosapp.ui.theme.AppTheme
 import com.doganesad.chronosapp.utils.Screens
 import com.doganesad.chronosapp.viewmodels.MainViewModel
 import com.doganesad.chronosapp.views.HomeTabScreen
+import com.doganesad.chronosapp.views.LoginScreenMain
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 
@@ -141,12 +146,6 @@ class MainActivity : ComponentActivity() {
         systemUiController.isNavigationBarVisible = false
         systemUiController.isStatusBarVisible = false
 
-//        // Set navigation bar color
-//        systemUiController.setNavigationBarColor(
-//            color = MaterialTheme.colorScheme.onSecondary, // Replace with your desired color
-//            darkIcons = useDarkIcons
-//        )
-//
         systemUiController.setStatusBarColor(
             color = colorResource(id = R.color.transparent_high), // Replace with your desired color
             darkIcons = useDarkIcons
@@ -155,9 +154,31 @@ class MainActivity : ComponentActivity() {
         val navController = rememberNavController()
         mainViewModel.navController = navController
 
+        // Observe authentication state
+        val isUserAuthenticated = Firebase.auth.currentUser != null
+
+        // GOOGLE SIGN IN NOT FUNCTIONAL AT THİS MOMENT
+
+//        // Firebase Authentication Check
+//        LaunchedEffect(Unit) {
+//            val currentUser = Firebase.auth.currentUser
+//            isUserAuthenticated.value = currentUser != null
+//
+//            // Navigate based on authentication status
+//            if (isUserAuthenticated.value) {
+//                navController.navigate(Screens.HOME_TABS_PAGE) {
+//                    popUpTo(0) // Clear backstack
+//                }
+//            } else {
+//                navController.navigate(Screens.LOGIN_PAGE) {
+//                    popUpTo(0) // Clear backstack
+//                }
+//            }
+//        }
+
         NavHost(
             navController = navController,
-            startDestination = Screens.HOME_TABS_PAGE,
+            startDestination = if (isUserAuthenticated) Screens.HOME_TABS_PAGE else Screens.LOGIN_PAGE,
             enterTransition = {
                 slideIntoContainer(
                     AnimatedContentTransitionScope.SlideDirection.Left,
@@ -186,50 +207,12 @@ class MainActivity : ComponentActivity() {
             composable(Screens.HOME_TABS_PAGE) {
                 HomeTabScreen(mainViewModel = mainViewModel)
             }
-//            composable(Screens.TRUCK_MAP_PAGE) {
-//                TruckMapScreen(mainViewModel = mainViewModel)
-//            }
-
-        }
-
-    }
-
-
-}
-
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    val systemUiController = rememberSystemUiController()
-    val useDarkIcons = !isSystemInDarkTheme()
-
-
-//     Set navigation bar color
-    systemUiController.setStatusBarColor(
-        color = colorResource(id = R.color.transparent), // Replace with your desired color
-        darkIcons = useDarkIcons
-    )
-
-    systemUiController.setNavigationBarColor(
-        color = MaterialTheme.colorScheme.surface, // Replace with your desired color
-        darkIcons = useDarkIcons
-    )
-    AppTheme {
-        Button(onClick = { /*TODO*/ }) {
-            Text(text = "aaa")
-        }
-
-        ExtendedFloatingActionButton(onClick = { /*TODO*/ }) {
-
+            composable(Screens.LOGIN_PAGE) {
+                LoginScreenMain(mainViewModel = mainViewModel)
+            }
         }
     }
 
-}
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AppTheme {
-        Greeting("Android")
-    }
+
 }

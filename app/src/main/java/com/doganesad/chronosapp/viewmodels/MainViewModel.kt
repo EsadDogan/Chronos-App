@@ -2,6 +2,8 @@ package com.doganesad.chronosapp.viewmodels
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
@@ -19,7 +21,12 @@ import com.doganesad.chronosapp.models.Photo
 import com.doganesad.chronosapp.models.RainVolume
 import com.doganesad.chronosapp.models.WeatherCondition
 import com.doganesad.chronosapp.models.WeatherResponse
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.Dispatchers
@@ -108,6 +115,58 @@ class MainViewModel() : ViewModel() {
             checkNewsDataUptoDate(db)
         }
     }
+
+
+
+    private val _signInState = MutableLiveData<Boolean>()
+    val signInState: LiveData<Boolean> = _signInState
+
+    fun handleSignInResult(task: Task<GoogleSignInAccount>) {
+        try {
+            val account = task.getResult(ApiException::class.java)!!
+            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+            Firebase.auth.signInWithCredential(credential)
+                .addOnCompleteListener { authTask ->
+                    _signInState.value = authTask.isSuccessful
+                    if (authTask.isSuccessful) {
+                        Log.e("GoogleAuth", "Firebase authentication successful")
+                    }else{
+                        Log.e("GoogleAuth", "Firebase authentication failed", authTask.exception)
+
+                    }
+                }
+        } catch (e: ApiException) {
+            _signInState.value = false
+            Log.e("GoogleAuth", "Google sign-in failed", e)
+        }
+    }
+
+
+    fun signUpWithEmail(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
+        Firebase.auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onResult(true, null) // Success
+                } else {
+                    onResult(false, task.exception?.message) // Error message
+                }
+            }
+    }
+
+
+
+    fun signInWithEmail(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
+        Firebase.auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onResult(true, null) // Success
+                } else {
+                    onResult(false, task.exception?.message) // Error message
+                }
+            }
+    }
+
+
 
 
 

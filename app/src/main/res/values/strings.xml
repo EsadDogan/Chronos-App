@@ -1,3 +1,14 @@
 <resources>
-    <string name="app_name">Chronos</string>
+    <string name="app_name" translatable="false">Chronos</string>
+    <string name="login_title">Time is limited. Spend it wisely with Chronos!</string>
+    <string name="login_desc">Please sign in to continue</string>
+    <string name="lbl_or">or</string>
+    <string name="btn_sign_in_google">Sign in with Google</string>
+    <string name="btn_sign_in">Sign in</string>
+    <string name="greeting_text">Hello %d</string>
+    <string name="lbl_sign_in_dislay_name">Display name</string>
+    <string name="lbl_error_name">Please enter your name to continue.</string>
+    <string name="lbl_error_email">Invalid email format.</string>
+    <string name="lbl_error_password">Password must be between 6 and 10 characters.</string>
+    <string name="lbl_error_unknown">An unknown error occurred.</string>
 </resources>
