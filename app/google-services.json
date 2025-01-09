@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "905426294563",
+    "project_id": "chronos-app-4df21",
+    "storage_bucket": "chronos-app-4df21.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:905426294563:android:b40c5d997115bfce99de96",
+        "android_client_info": {
+          "package_name": "com.doganesad.chronosapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "905426294563-0h0mnd6tskrvkirpu0kabako9eop1og1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.doganesad.chronosapp",
+            "certificate_hash": "695cf2d76661216d5ef26ebe60a19f245c21b251"
+          }
+        },
+        {
+          "client_id": "905426294563-68jqvfcqd7j5jgp60f1hcvi0vacnt00j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZxky4eQnmp6Z7rmu9azAGahVmYKNDr0M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "905426294563-68jqvfcqd7j5jgp60f1hcvi0vacnt00j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

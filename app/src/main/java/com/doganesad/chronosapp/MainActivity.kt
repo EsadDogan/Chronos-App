@@ -55,6 +55,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.delay
 
 import kotlinx.coroutines.launch
 import java.time.Duration
@@ -106,6 +107,8 @@ class MainActivity : ComponentActivity() {
                 val cx = screen.view.width / 2
                 val cy = screen.view.height / 2
 
+
+
                 val finalRadius = Math.hypot(cx.toDouble(), cy.toDouble()).toFloat()
                 val circularReveal =
                     ViewAnimationUtils.createCircularReveal(screen.view, cx, cy, finalRadius, 0f)
@@ -118,7 +121,6 @@ class MainActivity : ComponentActivity() {
 
 
         }
-        enableEdgeToEdge()
         setContent {
             AppTheme {
 
@@ -140,14 +142,19 @@ class MainActivity : ComponentActivity() {
         val systemUiController = rememberSystemUiController()
         val useDarkIcons = !isSystemInDarkTheme()
 
-        systemUiController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-
-        // Hide the navigation bar
-        systemUiController.isNavigationBarVisible = false
-        systemUiController.isStatusBarVisible = false
+//        systemUiController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+//
+//        // Hide the navigation bar
+//        systemUiController.isNavigationBarVisible = false
+//        systemUiController.isStatusBarVisible = false
 
         systemUiController.setStatusBarColor(
-            color = colorResource(id = R.color.transparent_high), // Replace with your desired color
+            color = MaterialTheme.colorScheme.surface,
+            darkIcons = useDarkIcons
+        )
+
+        systemUiController.setNavigationBarColor(
+            color = MaterialTheme.colorScheme.primaryContainer,
             darkIcons = useDarkIcons
         )
 
