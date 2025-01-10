@@ -1,6 +1,7 @@
 package com.doganesad.chronosapp.views
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,6 +47,8 @@ import com.doganesad.chronosapp.ui.theme.AppTheme
 import com.doganesad.chronosapp.ui.theme.Shapes
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import com.doganesad.chronosapp.ui.theme.backgroundDark
@@ -68,6 +72,10 @@ fun LoginScreenMain(modifier: Modifier = Modifier,mainViewModel: MainViewModel =
     var displayName by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    
+    BackHandler {
+        // TODO: NO BACK ALLOWED
+    }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -78,13 +86,18 @@ fun LoginScreenMain(modifier: Modifier = Modifier,mainViewModel: MainViewModel =
 
 //    val signInState by mainViewModel.signInState.observeAsState()
 
-    Box(Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center,) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Black), contentAlignment = Alignment.Center,) {
         Image(painter = painterResource(id = R.drawable.login_bg), contentDescription ="", modifier.fillMaxSize(),alignment = Alignment.TopCenter )
         Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,verticalArrangement = Arrangement.Bottom) {
 
 
 
-            Text(text = context.getString(R.string.app_name), color = Color.White,style = MaterialTheme.typography.displayLarge,modifier = Modifier.padding(bottom = 16.dp).padding(horizontal = 10.dp))
+            Text(text = context.getString(R.string.app_name), color = Color.White,style = MaterialTheme.typography.displayLarge,modifier = Modifier
+                .padding(bottom = 16.dp)
+                .padding(horizontal = 10.dp))
             TypewriterText(text = context.getString(R.string.login_title))
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -93,30 +106,36 @@ fun LoginScreenMain(modifier: Modifier = Modifier,mainViewModel: MainViewModel =
             TextField(
                 value = displayName,
                 onValueChange = { displayName = it },
+                maxLines = 1,
                 label = { Text(text=context.getString(R.string.lbl_sign_in_dislay_name), color = Color.White) }, // Label color set to white
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, capitalization = KeyboardCapitalization.Words),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
-                colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, disabledContainerColor = Color.Transparent)
+                colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, disabledContainerColor = Color.Transparent, focusedTextColor = Color.White, unfocusedTextColor = Color.White)
             )
 
             TextField(
                 value = email,
                 onValueChange = { email = it },
+                maxLines = 1,
                 label = { Text("Email", color = Color.White) }, // Label color set to white
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
-                colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, disabledContainerColor = Color.Transparent)
+                colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, disabledContainerColor = Color.Transparent, focusedTextColor = Color.White, unfocusedTextColor = Color.White)
             )
             Spacer(modifier = Modifier.height(16.dp))
             TextField(
                 value = password,
                 onValueChange = { password = it },
+                maxLines = 1,
                 label = { Text("Password",color = Color.White) },
-                colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, disabledContainerColor = Color.Transparent),
+                colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, disabledContainerColor = Color.Transparent, focusedTextColor = Color.White, unfocusedTextColor = Color.White),
                         visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
             LoginButton(
@@ -149,21 +168,25 @@ fun LoginScreenMain(modifier: Modifier = Modifier,mainViewModel: MainViewModel =
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text(text = context.getString(R.string.lbl_or), color = Color.White,style = MaterialTheme.typography.titleSmall,modifier = Modifier.padding(bottom = 16.dp).padding(horizontal = 10.dp))
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-
-
-            GoogleButton {
-                val googleSignInClient = GoogleAuthHelper.getGoogleSignInClient(context)
-                val signInIntent = googleSignInClient.signInIntent
-                launcher.launch(signInIntent)
-            }
+//            Text(text = context.getString(R.string.lbl_or), color = Color.White,style = MaterialTheme.typography.titleSmall,modifier = Modifier
+//                .padding(bottom = 16.dp)
+//                .padding(horizontal = 10.dp))
+//
+//            Spacer(modifier = Modifier.height(20.dp))
+//
+//
+//
+//            GoogleButton {
+//                val googleSignInClient = GoogleAuthHelper.getGoogleSignInClient(context)
+//                val signInIntent = googleSignInClient.signInIntent
+//                launcher.launch(signInIntent)
+//            }
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            Text(text = context.getString(R.string.login_desc), color = Color.White,style = MaterialTheme.typography.titleSmall,modifier = Modifier.padding(bottom = 16.dp).padding(horizontal = 10.dp))
+            Text(text = context.getString(R.string.login_desc), color = Color.White,style = MaterialTheme.typography.titleSmall,modifier = Modifier
+                .padding(bottom = 16.dp)
+                .padding(horizontal = 10.dp))
 
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -199,7 +222,9 @@ fun TypewriterText(text: String, modifier: Modifier = Modifier, delay: Int = 50)
         color = Color.White,
         textAlign = TextAlign.Center,
         style = MaterialTheme.typography.titleMedium,
-        modifier = modifier.padding(bottom = 16.dp).padding(horizontal = 10.dp)
+        modifier = modifier
+            .padding(bottom = 16.dp)
+            .padding(horizontal = 10.dp)
     )
 }
 

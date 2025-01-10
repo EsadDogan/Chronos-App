@@ -48,11 +48,9 @@ android {
         release {
             isMinifyEnabled = false
 
-
             }
         debug {
             isMinifyEnabled = false
-            // Add the API key here
 
         }
     }
@@ -105,6 +103,7 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.firestore)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.play.services.location)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -118,6 +117,8 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager:0.30.0")
     implementation ("com.google.firebase:firebase-auth-ktx")
     implementation ("com.google.android.gms:play-services-auth:21.2.0")
+
+    implementation ("com.google.accompanist:accompanist-permissions:0.32.0")
 
 
 

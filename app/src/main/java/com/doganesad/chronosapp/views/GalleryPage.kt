@@ -1,8 +1,11 @@
 package com.doganesad.chronosapp.views
 
+import android.provider.CalendarContract
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -15,20 +18,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.doganesad.chronosapp.models.Photo
 import com.doganesad.chronosapp.viewmodels.MainViewModel
@@ -43,7 +53,7 @@ fun GalleryScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
     Column {
 
 
-        Card(modifier = Modifier.padding(10.dp)) {
+        Card(modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 10.dp)) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -113,26 +123,52 @@ fun GalleryScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
 
 @Composable
 fun PhotosItem(modifier: Modifier = Modifier, photo: Photo) {
+
     Card(
-        onClick = { /*TODO*/ }, modifier = Modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp)
+            .padding(horizontal = 12.dp, vertical = 12.dp)
+            .height(450.dp),
+        elevation = CardDefaults.cardElevation(12.dp),
+        shape = MaterialTheme.shapes.large,
     ) {
-        Column {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+
             Image(
                 painter = rememberAsyncImagePainter(model = photo.src.large),
                 contentDescription = "Photo", // Provide meaningful descriptions for accessibility
-                modifier = modifier.fillMaxWidth(), // Use the modifier passed from parent
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(MaterialTheme.shapes.large), // Use the modifier passed from parent
                 contentScale = ContentScale.Crop // Scale the image to fill the space properly
             )
-            Text(
-                text = "Photographer: " + photo.photographer,
-                modifier = Modifier.padding(10.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
 
+
+            // Overlay content (pet info)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        // siyahlastirma
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Black),
+                            startY = 1000f
+                        )
+                    ),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Bottom,
+            ) {
+                Text(
+                    text = "Photographer: " + photo.photographer,
+                    modifier = Modifier.padding(start = 10.dp,end = 10.dp,bottom = 20.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White
+                )
+            }
+        }
     }
 
 }

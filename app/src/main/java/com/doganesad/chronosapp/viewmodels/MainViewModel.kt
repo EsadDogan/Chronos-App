@@ -114,7 +114,6 @@ class MainViewModel() : ViewModel() {
         getDogFacts()
         getCuratedPhotos()
         //Call weather from activity when location ready
-        getWeather()
         checkNewsDataUptoDate(db)
 
     }
@@ -382,13 +381,13 @@ class MainViewModel() : ViewModel() {
     }
 
 
-    private fun getWeather() {
+     fun getWeather(lat: Double, lon: Double) {
 
         viewModelScope.launch {
             try {
                 weatherResponse.value = RetrofitInstanceWeather.apiWeather.getWeatherData(
-                    lat = 52.237049,
-                    lon = 21.017532,
+                    lat = lat,
+                    lon = lon,
                     units = "metric"
                 )
 

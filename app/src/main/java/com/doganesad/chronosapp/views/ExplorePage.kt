@@ -4,7 +4,9 @@ import android.util.Log
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +26,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,45 +63,105 @@ fun BookGrid(books: List<BookModel>,mainViewModel: MainViewModel) {
 
 @Composable
 fun BookCard(book: BookModel,mainViewModel: MainViewModel) {
+
     Card(
         onClick = {
-          mainViewModel.selectedBook.value = book
-          mainViewModel.navController.navigate(Screens.READING_PAGE)
+            mainViewModel.selectedBook.value = book
+            mainViewModel.navController.navigate(Screens.READING_PAGE)
 
         },
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
+        modifier = Modifier.padding(8.dp).height(360.dp),
+        elevation = CardDefaults.cardElevation(4.dp),
+        shape = MaterialTheme.shapes.large,
     ) {
-        Column(
-            modifier = Modifier.padding(8.dp).heightIn(min = 360.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
         ) {
+
             Image(
                 painter = rememberAsyncImagePainter(book.bookImageUrl),
                 contentDescription = "Book Cover",
                 modifier = Modifier
-                    .height(250.dp)
+                    .height(360.dp)
                     .fillMaxWidth(),
                 contentScale = ContentScale.Crop
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = book.bookName,
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center,
-            )
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = book.bookAuthor,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                textAlign = TextAlign.Center,
-            )
+
+            // Overlay content (pet info)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        // siyahlastirma
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Black),
+                            startY = 0f
+                        )
+                    ),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Bottom,
+            ) {
+                Text(
+                    text = book.bookName,
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = book.bookAuthor,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
+
+
+//    Card(
+//        onClick = {
+//          mainViewModel.selectedBook.value = book
+//          mainViewModel.navController.navigate(Screens.READING_PAGE)
+//
+//        },
+//        modifier = Modifier
+//            .padding(8.dp)
+//            .fillMaxWidth(),
+//        elevation = CardDefaults.cardElevation(4.dp)
+//    ) {
+//        Column(
+//            modifier = Modifier.padding(8.dp).heightIn(min = 360.dp),
+//            horizontalAlignment = Alignment.CenterHorizontally,
+//            verticalArrangement = Arrangement.Center
+//        ) {
+//            Image(
+//                painter = rememberAsyncImagePainter(book.bookImageUrl),
+//                contentDescription = "Book Cover",
+//                modifier = Modifier
+//                    .height(250.dp)
+//                    .fillMaxWidth(),
+//                contentScale = ContentScale.Crop
+//            )
+//            Spacer(modifier = Modifier.height(8.dp))
+//            Text(
+//                text = book.bookName,
+//                style = MaterialTheme.typography.titleMedium,
+//                textAlign = TextAlign.Center,
+//            )
+//
+//            Spacer(modifier = Modifier.height(8.dp))
+//            Text(
+//                text = book.bookAuthor,
+//                style = MaterialTheme.typography.bodySmall,
+//                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+//                textAlign = TextAlign.Center,
+//            )
+//        }
+//    }
 }
 

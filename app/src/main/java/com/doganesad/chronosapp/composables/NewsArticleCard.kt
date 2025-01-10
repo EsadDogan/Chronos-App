@@ -1,5 +1,8 @@
 package com.doganesad.chronosapp.composables
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,16 +19,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
 import coil.compose.rememberAsyncImagePainter
 import com.doganesad.chronosapp.models.NewsArticle
 
 @Composable
 fun NewsArticleCard(article: NewsArticle, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     Card(
         onClick = {
-            // TODO: see details about news
+            openBrowser(context, article.url?:"https://www.google.com")
         },
         shape = RoundedCornerShape(8.dp),
         modifier = modifier
@@ -97,4 +103,10 @@ fun NewsArticleCard(article: NewsArticle, modifier: Modifier = Modifier) {
             )
         }
     }
+}
+
+
+fun openBrowser(context: Context, url: String) {
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+    context.startActivity(intent)
 }

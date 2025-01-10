@@ -1,36 +1,33 @@
 package com.doganesad.chronosapp.views
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
+import android.location.Location
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,26 +39,61 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import com.doganesad.chronosapp.R
 import com.doganesad.chronosapp.composables.CustomHtmlWebView
 import com.doganesad.chronosapp.composables.DogCatFactsPagerItem
 import com.doganesad.chronosapp.composables.NewsArticleCard
 import com.doganesad.chronosapp.viewmodels.MainViewModel
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import kotlinx.coroutines.launch
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import java.util.Calendar
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
 
+
+
     val systemUiController = rememberSystemUiController()
     val useDarkIcons = !isSystemInDarkTheme()
+
+    val context = LocalContext.current
+    val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        when {
+            permissionState.status.isGranted -> {
+                fetchLocation(context,mainViewModel = mainViewModel)
+            }
+            permissionState.status.shouldShowRationale -> {
+                // Optionally, show rationale to the user
+                permissionState.launchPermissionRequest()
+            }
+            else -> {
+                permissionState.launchPermissionRequest()
+            }
+        }
+    }
+
+    // Handle permission result
+    LaunchedEffect(permissionState.status) {
+        when {
+            permissionState.status.isGranted -> {
+                fetchLocation(context, mainViewModel = mainViewModel)
+            }
+            permissionState.status.isPermanentlyDenied() -> {
+
+            }
+        }
+    }
 
 
     systemUiController.setStatusBarColor(
@@ -405,6 +437,29 @@ fun CatFact(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
 
 }
 
+
+@SuppressLint("MissingPermission")
+private fun fetchLocation(
+    context: Context,
+    mainViewModel: MainViewModel
+) {
+    val fusedLocationClient: FusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(context)
+
+    fusedLocationClient.lastLocation
+        .addOnSuccessListener { location: Location? ->
+            location?.let {
+                mainViewModel.getWeather(lat = it.latitude, lon = it.longitude)
+            } ?: run {
+                mainViewModel.getWeather( lat= 52.237049, lon = 21.017532)
+            }
+        }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+fun PermissionStatus.isPermanentlyDenied(): Boolean {
+    return this is PermissionStatus.Denied && !this.shouldShowRationale
+}
 
 
 
