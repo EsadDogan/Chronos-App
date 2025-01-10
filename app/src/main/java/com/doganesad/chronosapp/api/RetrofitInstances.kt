@@ -13,9 +13,9 @@ object RetrofitInstanceWeather {
     private const val baseUrlWeather = "https://api.openweathermap.org/data/3.0/"
 
     private val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(120, TimeUnit.SECONDS)
-        .readTimeout(120, TimeUnit.SECONDS)
-        .writeTimeout(120, TimeUnit.SECONDS)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .addInterceptor(RetryInterceptor(maxRetry = 7))
         .addInterceptor(Interceptor { chain ->
             val originalRequest = chain.request()
@@ -44,9 +44,9 @@ object RetrofitInstancePexels {
     private const val baseUrlPexels = "https://api.pexels.com/v1/"
 
     private val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(120, TimeUnit.SECONDS)
-        .readTimeout(120, TimeUnit.SECONDS)
-        .writeTimeout(120, TimeUnit.SECONDS)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .addInterceptor(RetryInterceptor(maxRetry = 7))
         .addInterceptor { chain ->
             val originalRequest = chain.request()
@@ -74,9 +74,9 @@ object RetrofitInstanceNews {
     private const val baseUrlNews= "https://api.mediastack.com/v1/"
 
     private val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(120, TimeUnit.SECONDS)
-        .readTimeout(120, TimeUnit.SECONDS)
-        .writeTimeout(120, TimeUnit.SECONDS)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .addInterceptor(RetryInterceptor(maxRetry = 7))
         .addInterceptor(Interceptor { chain ->
             val originalRequest = chain.request()
@@ -105,9 +105,9 @@ object RetrofitInstancesDogFacts {
     private const val baseUrlDogFacts = "https://dogapi.dog/api/v2/"
 
     private val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(120, TimeUnit.SECONDS)
-        .readTimeout(120, TimeUnit.SECONDS)
-        .writeTimeout(120, TimeUnit.SECONDS)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .addInterceptor(RetryInterceptor(maxRetry = 7))
         .build()
 
@@ -126,9 +126,9 @@ object RetrofitInstancesCatFacts {
     private const val baseUrlCatFacts = "https://cat-fact.herokuapp.com/"
 
     private val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(120, TimeUnit.SECONDS)
-        .readTimeout(120, TimeUnit.SECONDS)
-        .writeTimeout(120, TimeUnit.SECONDS)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .addInterceptor(RetryInterceptor(maxRetry = 7))
         .build()
 

@@ -41,33 +41,40 @@ fun GalleryScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
     val photos = mainViewModel.curratedPhotos.value
 
     Column {
-        
-        Text(text = "Gallery", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 20.dp, start = 10.dp))
-        
-        Card(modifier = Modifier.padding(10.dp)){
-            Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+
+
+        Card(modifier = Modifier.padding(10.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
                 TextField(
                     value = mainViewModel.searchBarText.value,
                     onValueChange = {
                         mainViewModel.searchBarText.value = it
                         if (it.isNotEmpty()) {
-                            mainViewModel.viewModelScope.launch {
-                                mainViewModel.searchForImage()
-                            }
-                        }else{
-                            mainViewModel.viewModelScope.launch {
-                                mainViewModel.getCuratedPhotos()
-                            }
+
+                            mainViewModel.searchForImage()
+
+                        } else {
+
+                            mainViewModel.getCuratedPhotos()
+
                         }
                     },
                     label = { Text("Search by Pexels") }, // Label is a composable function
                     modifier = Modifier.weight(1f),
-                    leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "search")}
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "search"
+                        )
+                    }
                 )
             }
         }
-        
+
         // Handle empty state
         if (photos.isNullOrEmpty()) {
             // Show some placeholder or empty state text
@@ -106,9 +113,11 @@ fun GalleryScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
 
 @Composable
 fun PhotosItem(modifier: Modifier = Modifier, photo: Photo) {
-    Card(onClick = { /*TODO*/ }, modifier = Modifier
-        .fillMaxWidth()
-        .padding(10.dp)) {
+    Card(
+        onClick = { /*TODO*/ }, modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)
+    ) {
         Column {
             Image(
                 painter = rememberAsyncImagePainter(model = photo.src.large),
@@ -116,7 +125,12 @@ fun PhotosItem(modifier: Modifier = Modifier, photo: Photo) {
                 modifier = modifier.fillMaxWidth(), // Use the modifier passed from parent
                 contentScale = ContentScale.Crop // Scale the image to fill the space properly
             )
-            Text(text = "Photographer: "+photo.photographer, modifier = Modifier.padding(10.dp), style = MaterialTheme.typography.bodyMedium,color = MaterialTheme.colorScheme.primary)
+            Text(
+                text = "Photographer: " + photo.photographer,
+                modifier = Modifier.padding(10.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
 
     }

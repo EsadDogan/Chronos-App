@@ -38,10 +38,7 @@ fun HomeTabScreen(mainViewModel: MainViewModel) {
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
     Scaffold(
-        topBar = {
 
-
-        },
         bottomBar = {
             NavigationBar(
                 modifier = Modifier
@@ -76,15 +73,15 @@ fun HomeTabScreen(mainViewModel: MainViewModel) {
                     icon = {
 
                         Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(id = R.drawable.explore_nav_bar),
-                            contentDescription = "Explore"
+                            modifier = Modifier.size(20.dp),
+                            painter = painterResource(id = R.drawable.book_nav_bar),
+                            contentDescription = "library"
                         )
 
                     },
                     label = {
                         Text(
-                            "Explore",
+                            "Library",
                             style = MaterialTheme.typography.labelSmall,
                             fontSize = 10.sp
                         )
@@ -143,7 +140,7 @@ fun HomeTabScreen(mainViewModel: MainViewModel) {
         },
         content = { innerPadding ->
             AnimatedContent(
-                modifier = Modifier.padding(),
+                modifier = Modifier.padding(innerPadding),
                 targetState = selectedTabIndex,
 //                transitionSpec = {
 //                    fadeIn(tween(300)) with fadeOut(tween(300)) // You can define your transition here
@@ -152,22 +149,22 @@ fun HomeTabScreen(mainViewModel: MainViewModel) {
             ) { targetTab ->
                 when (targetTab) {
                     0 -> HomeScreen(
-                        modifier = Modifier.padding(innerPadding),
+                        modifier = Modifier.padding(),
                         mainViewModel = mainViewModel
                     )
 
                     1 -> ExploreScreen(
-                        modifier = Modifier.padding(innerPadding),
+                        modifier = Modifier.padding(),
                         mainViewModel = mainViewModel
                     )
 
                     2 -> GalleryScreen(
-                        modifier = Modifier.padding(innerPadding),
+                        modifier = Modifier.padding(),
                         mainViewModel = mainViewModel
                     )
 
                     3 -> MoreScreen(
-                        modifier = Modifier.padding(innerPadding),
+                        modifier = Modifier.padding(),
                         mainViewModel = mainViewModel
                     )
                 }

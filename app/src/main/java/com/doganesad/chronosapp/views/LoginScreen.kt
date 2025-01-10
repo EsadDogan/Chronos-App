@@ -128,7 +128,7 @@ fun LoginScreenMain(modifier: Modifier = Modifier,mainViewModel: MainViewModel =
                     }else if (displayName.isEmpty()) {
                         errorMessage = context.getString(R.string.lbl_error_name)
                     } else {
-                        mainViewModel.signUpWithEmail(email, password) { success, error ->
+                        mainViewModel.signUpWithEmail(email, password,displayName) { success, error ->
                             if (success) {
                                 mainViewModel.navController.navigate(Screens.HOME_TABS_PAGE) {
                                     popUpTo(0)

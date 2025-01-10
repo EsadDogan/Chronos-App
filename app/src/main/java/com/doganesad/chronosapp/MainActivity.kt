@@ -50,6 +50,7 @@ import com.doganesad.chronosapp.utils.Screens
 import com.doganesad.chronosapp.viewmodels.MainViewModel
 import com.doganesad.chronosapp.views.HomeTabScreen
 import com.doganesad.chronosapp.views.LoginScreenMain
+import com.doganesad.chronosapp.views.ReadingPage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -124,6 +125,20 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme {
 
+                val systemUiController = rememberSystemUiController()
+                val useDarkIcons = !isSystemInDarkTheme()
+
+
+                systemUiController.setStatusBarColor(
+                    color = MaterialTheme.colorScheme.background,
+                    darkIcons = useDarkIcons
+                )
+
+                systemUiController.setNavigationBarColor(
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    darkIcons = useDarkIcons
+                )
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     MyApp(
                         modifier = Modifier.padding(innerPadding)
@@ -139,24 +154,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MyApp(modifier: Modifier = Modifier) {
 
-        val systemUiController = rememberSystemUiController()
-        val useDarkIcons = !isSystemInDarkTheme()
 
-//        systemUiController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-//
-//        // Hide the navigation bar
-//        systemUiController.isNavigationBarVisible = false
-//        systemUiController.isStatusBarVisible = false
-
-        systemUiController.setStatusBarColor(
-            color = MaterialTheme.colorScheme.surface,
-            darkIcons = useDarkIcons
-        )
-
-        systemUiController.setNavigationBarColor(
-            color = MaterialTheme.colorScheme.primaryContainer,
-            darkIcons = useDarkIcons
-        )
 
         val navController = rememberNavController()
         mainViewModel.navController = navController
@@ -216,6 +214,9 @@ class MainActivity : ComponentActivity() {
             }
             composable(Screens.LOGIN_PAGE) {
                 LoginScreenMain(mainViewModel = mainViewModel)
+            }
+            composable(Screens.READING_PAGE) {
+                ReadingPage(mainViewModel = mainViewModel )
             }
         }
     }

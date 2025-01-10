@@ -2,7 +2,9 @@ package com.doganesad.chronosapp.views
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,10 +37,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.doganesad.chronosapp.R
 import com.doganesad.chronosapp.composables.CustomHtmlWebView
 import com.doganesad.chronosapp.composables.DogCatFactsPagerItem
@@ -46,10 +53,26 @@ import com.doganesad.chronosapp.viewmodels.MainViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
+
+    val systemUiController = rememberSystemUiController()
+    val useDarkIcons = !isSystemInDarkTheme()
+
+
+    systemUiController.setStatusBarColor(
+        color = MaterialTheme.colorScheme.background,
+        darkIcons = useDarkIcons
+    )
+
+    systemUiController.setNavigationBarColor(
+        color = MaterialTheme.colorScheme.onSecondary,
+        darkIcons = useDarkIcons
+    )
 
     val verticalScrollState = rememberScrollState()
 
@@ -57,13 +80,7 @@ fun HomeScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
         modifier = modifier
             .verticalScroll(state = verticalScrollState)
     ) {
-        Text(
-            text = "Good Afternoon Edwin",
-            modifier = Modifier.padding(top = 10.dp, start = 10.dp, end = 10.dp),
-            style = MaterialTheme.typography.displaySmall,
-            fontSize = 23.sp,
-            maxLines = 1
-        )
+        GreetingText()
 
         // DOG FACTS
 
@@ -103,7 +120,9 @@ fun HomeScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 20.dp, start = 10.dp, end = 10.dp)
         )
-        CustomHtmlWebView(modifier = Modifier.padding(top = 10.dp,start = 10.dp, end = 10.dp).height(160.dp) )
+        CustomHtmlWebView(modifier = Modifier
+            .padding(top = 10.dp, start = 10.dp, end = 10.dp)
+            .height(160.dp) )
 
 
         // SONG
@@ -113,7 +132,9 @@ fun HomeScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 20.dp, start = 10.dp, end = 10.dp)
         )
-        CustomHtmlWebView(modifier = Modifier.padding(top = 10.dp,start = 10.dp, end = 10.dp).height(160.dp), innerHeight = "220px", innerIframe = "<iframe style=\"border-radius:12px\" src=\"https://open.spotify.com/embed/track/5QO3UJc1gF1ummP75n2b3R?utm_source=generator\" width=\"100%\" height=\"352\" frameBorder=\"0\" allowfullscreen=\"\" allow=\"autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture\" loading=\"lazy\"></iframe>" )
+        CustomHtmlWebView(modifier = Modifier
+            .padding(top = 10.dp, start = 10.dp, end = 10.dp)
+            .height(160.dp), innerHeight = "220px", innerIframe = "<iframe style=\"border-radius:12px\" src=\"https://open.spotify.com/embed/track/5QO3UJc1gF1ummP75n2b3R?utm_source=generator\" width=\"100%\" height=\"352\" frameBorder=\"0\" allowfullscreen=\"\" allow=\"autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture\" loading=\"lazy\"></iframe>" )
 
 
         Text(
@@ -121,7 +142,9 @@ fun HomeScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 20.dp, start = 10.dp, end = 10.dp)
         )
-        CustomHtmlWebView(modifier = Modifier.padding(top = 10.dp,start = 10.dp, end = 10.dp).height(400.dp), innerHeight = "400px", innerIframe = "<iframe style=\"border-radius:12px\" src=\"https://open.spotify.com/embed/artist/6M2wZ9GZgrQXHCFfjv46we?utm_source=generator\" width=\"100%\" height=\"352\" frameBorder=\"0\" allowfullscreen=\"\" allow=\"autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture\" loading=\"lazy\"></iframe>" )
+        CustomHtmlWebView(modifier = Modifier
+            .padding(top = 10.dp, start = 10.dp, end = 10.dp)
+            .height(400.dp), innerHeight = "400px", innerIframe = "<iframe style=\"border-radius:12px\" src=\"https://open.spotify.com/embed/artist/6M2wZ9GZgrQXHCFfjv46we?utm_source=generator\" width=\"100%\" height=\"352\" frameBorder=\"0\" allowfullscreen=\"\" allow=\"autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture\" loading=\"lazy\"></iframe>" )
 
 
 
@@ -156,6 +179,23 @@ fun HomeScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
 }
 
 
+@Composable
+fun GreetingText() {
+    val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+    val greeting = when (currentHour) {
+        in 0..11 -> "Good Morning"
+        in 12..16 -> "Good Afternoon"
+        in 17..20 -> "Good Evening"
+        else -> "Good Night"
+    }
+
+    Text(
+        text = greeting,
+        modifier = Modifier.padding(top = 10.dp, start = 10.dp, end = 10.dp),
+        style = MaterialTheme.typography.displaySmall.copy(fontSize = 23.sp, fontWeight = FontWeight.Normal),
+        maxLines = 1
+    )
+}
 
 
 
@@ -183,6 +223,12 @@ fun WeatherCard(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Ensure image has a proper size
+//                AsyncImage(model = ImageRequest.Builder(LocalContext.current).data("https://openweathermap.org/img/wn/10n@2x.png").build(),
+//                    modifier = Modifier
+//                    .size(84.dp) // Specify a size for the image
+//                    .padding(end = 8.dp),
+//                    contentScale = ContentScale.Fit,
+//                    contentDescription = "", )
                 Image(
                     painter = rememberAsyncImagePainter(model = "https://openweathermap.org/img/wn/${mainViewModel.weatherResponse.value.current.weather.first().icon}@2x.png"),
                     contentDescription = "Weather Icon",
