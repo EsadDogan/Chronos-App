@@ -4,7 +4,10 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animation
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -27,6 +30,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -47,10 +52,12 @@ import com.doganesad.chronosapp.ui.theme.AppTheme
 import com.doganesad.chronosapp.ui.theme.Shapes
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import com.doganesad.chronosapp.ui.theme.backgroundDark
 import com.doganesad.chronosapp.utils.GoogleAuthHelper
 import com.doganesad.chronosapp.utils.Screens
@@ -64,15 +71,16 @@ fun isValidEmail(email: String): Boolean {
 }
 
 @Composable
-fun LoginScreenMain(modifier: Modifier = Modifier,mainViewModel: MainViewModel = MainViewModel()) {
+fun LoginScreenMain(modifier: Modifier = Modifier, mainViewModel: MainViewModel = MainViewModel()) {
 
     val context = LocalContext.current
+
 
     var email by remember { mutableStateOf("") }
     var displayName by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    
+
     BackHandler {
         // TODO: NO BACK ALLOWED
     }
@@ -89,31 +97,78 @@ fun LoginScreenMain(modifier: Modifier = Modifier,mainViewModel: MainViewModel =
     Box(
         Modifier
             .fillMaxSize()
-            .background(Color.Black), contentAlignment = Alignment.Center,) {
-        Image(painter = painterResource(id = R.drawable.login_bg), contentDescription ="", modifier.fillMaxSize(),alignment = Alignment.TopCenter )
-        Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,verticalArrangement = Arrangement.Bottom) {
+            .background(Color.Black),
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.login_bg),
+            contentDescription = "",
+            modifier.fillMaxSize(),
+            alignment = Alignment.TopCenter
+        )
+        Column(
+            Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom
+        ) {
 
 
+            var selectedTabIndex by remember { mutableStateOf(0) }
+            val tabs = listOf("Home", "About", "Settings")
 
-            Text(text = context.getString(R.string.app_name), color = Color.White,style = MaterialTheme.typography.displayLarge,modifier = Modifier
-                .padding(bottom = 16.dp)
-                .padding(horizontal = 10.dp))
+            TabRow(selectedTabIndex = selectedTabIndex) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        text = { Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
+                        selected = selectedTabIndex == index,
+                        onClick = { selectedTabIndex = index }
+                    )
+                }
+            }
+
+
+            Text(
+                text = context.getString(R.string.app_name),
+                color = Color.White,
+                style = MaterialTheme.typography.displayLarge,
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .padding(horizontal = 10.dp)
+            )
             TypewriterText(text = context.getString(R.string.login_title))
 
             Spacer(modifier = Modifier.height(20.dp))
 
 
-            TextField(
-                value = displayName,
-                onValueChange = { displayName = it },
-                maxLines = 1,
-                label = { Text(text=context.getString(R.string.lbl_sign_in_dislay_name), color = Color.White) }, // Label color set to white
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, capitalization = KeyboardCapitalization.Words),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, disabledContainerColor = Color.Transparent, focusedTextColor = Color.White, unfocusedTextColor = Color.White)
-            )
+            androidx.compose.animation.AnimatedVisibility(visible = selectedTabIndex == 0) {
+                TextField(
+                    value = displayName,
+                    onValueChange = { displayName = it },
+                    maxLines = 1,
+                    label = {
+                        Text(
+                            text = context.getString(R.string.lbl_sign_in_dislay_name),
+                            color = Color.White
+                        )
+                    }, // Label color set to white
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        capitalization = KeyboardCapitalization.Words
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
+                    )
+                )
+            }
+
+
 
             TextField(
                 value = email,
@@ -123,42 +178,72 @@ fun LoginScreenMain(modifier: Modifier = Modifier,mainViewModel: MainViewModel =
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
-                colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, disabledContainerColor = Color.Transparent, focusedTextColor = Color.White, unfocusedTextColor = Color.White)
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                )
             )
             Spacer(modifier = Modifier.height(16.dp))
             TextField(
                 value = password,
                 onValueChange = { password = it },
                 maxLines = 1,
-                label = { Text("Password",color = Color.White) },
-                colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, disabledContainerColor = Color.Transparent, focusedTextColor = Color.White, unfocusedTextColor = Color.White),
-                        visualTransformation = PasswordVisualTransformation(),
+                label = { Text("Password", color = Color.White) },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                ),
+                visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
-            LoginButton(
-                onClick = {
-                    if (!isValidEmail(email)) {
-                        errorMessage = context.getString(R.string.lbl_error_email)
-                    } else if (password.length !in 6..10) {
-                        errorMessage = context.getString(R.string.lbl_error_password)
-                    }else if (displayName.isEmpty()) {
-                        errorMessage = context.getString(R.string.lbl_error_name)
-                    } else {
-                        mainViewModel.signUpWithEmail(email, password,displayName) { success, error ->
-                            if (success) {
-                                mainViewModel.navController.navigate(Screens.HOME_TABS_PAGE) {
-                                    popUpTo(0)
-                                }
+
+
+            An
+
+
+            AnimatedContent(targetState = selectedTabIndex) {
+                when (it) {
+                    0 -> LoginButton(
+                        onClick = {
+                            if (!isValidEmail(email)) {
+                                errorMessage = context.getString(R.string.lbl_error_email)
+                            } else if (password.length !in 6..10) {
+                                errorMessage = context.getString(R.string.lbl_error_password)
+                            } else if (displayName.isEmpty()) {
+                                errorMessage = context.getString(R.string.lbl_error_name)
                             } else {
-                                errorMessage = error ?: context.getString(R.string.lbl_error_unknown)
+                                mainViewModel.signUpWithEmail(
+                                    email,
+                                    password,
+                                    displayName
+                                ) { success, error ->
+                                    if (success) {
+                                        mainViewModel.navController.navigate(Screens.HOME_TABS_PAGE) {
+                                            popUpTo(0)
+                                        }
+                                    } else {
+                                        errorMessage =
+                                            error ?: context.getString(R.string.lbl_error_unknown)
+                                    }
+                                }
                             }
                         }
-                    }
+                    )
+
                 }
-            )
+
+            }
+
+
             Spacer(modifier = Modifier.height(8.dp))
 
             errorMessage?.let {
@@ -184,9 +269,14 @@ fun LoginScreenMain(modifier: Modifier = Modifier,mainViewModel: MainViewModel =
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            Text(text = context.getString(R.string.login_desc), color = Color.White,style = MaterialTheme.typography.titleSmall,modifier = Modifier
-                .padding(bottom = 16.dp)
-                .padding(horizontal = 10.dp))
+            Text(
+                text = context.getString(R.string.login_desc),
+                color = Color.White,
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .padding(horizontal = 10.dp)
+            )
 
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -229,8 +319,6 @@ fun TypewriterText(text: String, modifier: Modifier = Modifier, delay: Int = 50)
 }
 
 
-
-
 @Composable
 fun LoginButton(
     text: String = stringResource(id = R.string.btn_sign_in),
@@ -271,7 +359,7 @@ fun LoginButton(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Text(text =  text)
+            Text(text = text)
 
         }
     }
@@ -326,7 +414,7 @@ fun GoogleButton(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Text(text =  text)
+            Text(text = text)
 
             if (isLoading) {
                 Spacer(modifier = Modifier.width(16.dp))
