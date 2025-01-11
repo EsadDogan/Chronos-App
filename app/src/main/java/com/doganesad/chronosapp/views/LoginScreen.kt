@@ -76,6 +76,9 @@ fun LoginScreenMain(modifier: Modifier = Modifier, mainViewModel: MainViewModel 
     val context = LocalContext.current
 
 
+    var selectedTabIndex by remember { mutableStateOf(0) }
+    val tabs = listOf("Sign in", "Log in")
+
     var email by remember { mutableStateOf("") }
     var displayName by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -98,7 +101,7 @@ fun LoginScreenMain(modifier: Modifier = Modifier, mainViewModel: MainViewModel 
         Modifier
             .fillMaxSize()
             .background(Color.Black),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.TopCenter,
     ) {
         Image(
             painter = painterResource(id = R.drawable.login_bg),
@@ -106,25 +109,20 @@ fun LoginScreenMain(modifier: Modifier = Modifier, mainViewModel: MainViewModel 
             modifier.fillMaxSize(),
             alignment = Alignment.TopCenter
         )
+        TabRow(selectedTabIndex = selectedTabIndex) {
+            tabs.forEachIndexed { index, title ->
+                Tab(
+                    text = { Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
+                    selected = selectedTabIndex == index,
+                    onClick = { selectedTabIndex = index }
+                )
+            }
+        }
         Column(
             Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Bottom
         ) {
-
-
-            var selectedTabIndex by remember { mutableStateOf(0) }
-            val tabs = listOf("Home", "About", "Settings")
-
-            TabRow(selectedTabIndex = selectedTabIndex) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        text = { Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
-                        selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index }
-                    )
-                }
-            }
 
 
             Text(
@@ -207,7 +205,7 @@ fun LoginScreenMain(modifier: Modifier = Modifier, mainViewModel: MainViewModel 
             Spacer(modifier = Modifier.height(16.dp))
 
 
-            An
+
 
 
             AnimatedContent(targetState = selectedTabIndex) {
@@ -225,6 +223,32 @@ fun LoginScreenMain(modifier: Modifier = Modifier, mainViewModel: MainViewModel 
                                     email,
                                     password,
                                     displayName
+                                ) { success, error ->
+                                    if (success) {
+                                        mainViewModel.navController.navigate(Screens.HOME_TABS_PAGE) {
+                                            popUpTo(0)
+                                        }
+                                    } else {
+                                        errorMessage =
+                                            error ?: context.getString(R.string.lbl_error_unknown)
+                                    }
+                                }
+                            }
+                        }
+                    )
+
+
+                    1 -> LoginButton(
+                        text = "Log in",
+                        onClick = {
+                            if (!isValidEmail(email)) {
+                                errorMessage = context.getString(R.string.lbl_error_email)
+                            } else if (password.length !in 6..10) {
+                                errorMessage = context.getString(R.string.lbl_error_password)
+                            } else {
+                                mainViewModel.signInWithEmail(
+                                    email,
+                                    password,
                                 ) { success, error ->
                                     if (success) {
                                         mainViewModel.navController.navigate(Screens.HOME_TABS_PAGE) {

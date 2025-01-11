@@ -25,8 +25,8 @@ android {
         applicationId = "com.doganesad.chronosapp"
         minSdk = 29
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.2"
 
 
         // Inject the API keys into the BuildConfig class
@@ -119,6 +119,8 @@ dependencies {
     implementation ("com.google.android.gms:play-services-auth:21.2.0")
 
     implementation ("com.google.accompanist:accompanist-permissions:0.32.0")
+
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
 
 
 

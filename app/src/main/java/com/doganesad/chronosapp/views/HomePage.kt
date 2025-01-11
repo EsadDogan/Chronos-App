@@ -251,7 +251,7 @@ fun WeatherCard(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Ensure image has a proper size
@@ -262,7 +262,8 @@ fun WeatherCard(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
 //                    contentScale = ContentScale.Fit,
 //                    contentDescription = "", )
                 Image(
-                    painter = rememberAsyncImagePainter(model = "https://openweathermap.org/img/wn/${mainViewModel.weatherResponse.value.current.weather.first().icon}@2x.png"),
+                   // painter = rememberAsyncImagePainter(model = "https://openweathermap.org/img/wn/${mainViewModel.weatherResponse.value.current.weather.first().icon}@2x.png"),
+                    painter = rememberAsyncImagePainter(model = "https://firebasestorage.googleapis.com/v0/b/chronos-app-4df21.appspot.com/o/${mainViewModel.weatherResponse.value.current.weather.first().icon}%402x.png?alt=media&token=672492ab-ee83-44f6-8f71-1a62324d0e44"),
                     contentDescription = "Weather Icon",
                     modifier = Modifier
                         .size(84.dp) // Specify a size for the image

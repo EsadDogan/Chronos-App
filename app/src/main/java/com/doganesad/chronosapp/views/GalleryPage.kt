@@ -1,6 +1,5 @@
 package com.doganesad.chronosapp.views
 
-import android.provider.CalendarContract
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,22 +12,18 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,13 +31,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
-import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import com.doganesad.chronosapp.R
 import com.doganesad.chronosapp.models.Photo
 import com.doganesad.chronosapp.viewmodels.MainViewModel
-import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -101,6 +96,7 @@ fun GalleryScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
                     // Add debugging to see if items are being displayed
                     if (photos[index].src.original.isNotEmpty()) {
                         PhotosItem(
+                            mainViewModel = mainViewModel,
                             photo = photos[index],
                             modifier = Modifier
                                 .fillMaxWidth() // Full width image
@@ -122,7 +118,9 @@ fun GalleryScreen(modifier: Modifier = Modifier, mainViewModel: MainViewModel) {
 }
 
 @Composable
-fun PhotosItem(modifier: Modifier = Modifier, photo: Photo) {
+fun PhotosItem(modifier: Modifier = Modifier, photo: Photo, mainViewModel: MainViewModel) {
+
+    val context = LocalContext.current
 
     Card(
         modifier = Modifier
@@ -138,13 +136,17 @@ fun PhotosItem(modifier: Modifier = Modifier, photo: Photo) {
         ) {
 
             Image(
-                painter = rememberAsyncImagePainter(model = photo.src.large),
+                painter = rememberAsyncImagePainter(model = photo.src.large2x),
                 contentDescription = "Photo", // Provide meaningful descriptions for accessibility
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(MaterialTheme.shapes.large), // Use the modifier passed from parent
                 contentScale = ContentScale.Crop // Scale the image to fill the space properly
             )
+
+
+
+
 
 
             // Overlay content (pet info)
@@ -161,12 +163,19 @@ fun PhotosItem(modifier: Modifier = Modifier, photo: Photo) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Bottom,
             ) {
-                Text(
-                    text = "Photographer: " + photo.photographer,
-                    modifier = Modifier.padding(start = 10.dp,end = 10.dp,bottom = 20.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White
-                )
+                Row(Modifier.padding(start = 10.dp,end = 10.dp,bottom = 20.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(
+                        text = "Photographer: " + photo.photographer,
+                        modifier = Modifier,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White
+                    )
+
+                    IconButton(onClick = { mainViewModel.downloadImage(context = context, url = photo.src.large2x) }, modifier = Modifier) {
+                        Icon(painterResource(R.drawable.download), contentDescription = "download", tint = Color.White)
+                    }
+                }
+
             }
         }
     }

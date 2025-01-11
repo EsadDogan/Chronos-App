@@ -108,13 +108,14 @@ fun BookCard(book: BookModel,mainViewModel: MainViewModel) {
                     text = book.bookName,
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center,
+                    color = Color.White
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = book.bookAuthor,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    color = Color.White.copy(0.7f),
                     textAlign = TextAlign.Center,
                 )
                 Spacer(modifier = Modifier.height(8.dp))

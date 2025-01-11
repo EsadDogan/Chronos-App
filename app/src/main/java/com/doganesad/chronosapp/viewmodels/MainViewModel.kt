@@ -1,6 +1,14 @@
 package com.doganesad.chronosapp.viewmodels
 
+import android.content.ContentValues
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -33,6 +41,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -143,7 +157,12 @@ class MainViewModel() : ViewModel() {
     }
 
 
-    fun signUpWithEmail(email: String, password: String,userName: String, onResult: (Boolean, String?) -> Unit) {
+    fun signUpWithEmail(
+        email: String,
+        password: String,
+        userName: String,
+        onResult: (Boolean, String?) -> Unit
+    ) {
         Firebase.auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -180,246 +199,320 @@ class MainViewModel() : ViewModel() {
             }
     }
 
-    private fun getBooks() {
-        val bookResponse = mutableListOf<BookModel>()
-
-        viewModelScope.launch(Dispatchers.IO) {
+    fun downloadImage(context: Context, url: String) {
+        // Use a coroutine for network and file operations
+        kotlinx.coroutines.GlobalScope.launch {
             try {
-                db.collection("book")
-                    .get()
-                    .addOnSuccessListener { result ->
-                        for (document in result) {
-                            bookResponse.add(document.toObject(BookModel::class.java))
-                        }
-                        Log.d(TAG, "getBooks: $bookResponse")
+                val client = OkHttpClient()
+                val request = Request.Builder().url(url).build()
+                val response = client.newCall(request).execute()
+
+                if (response.isSuccessful) {
+                    val inputStream = response.body?.byteStream()
+                    inputStream?.let {
+                        val fileName = "downloaded_image_${System.currentTimeMillis()}.jpg"
+                        saveImageToGallery(context, it, fileName)
                     }
-                    .addOnFailureListener { exception ->
-                        Log.w(TAG, "Error getting documents.", exception)
-                    }.addOnCompleteListener {
-
-                        if (bookResponse.isNotEmpty()) {
-
-                            books.value = bookResponse
-
-                        }
-
+                    // Show the toast on the main thread
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "Image downloaded", Toast.LENGTH_SHORT).show()
                     }
+                }
+                response.body?.close()
             } catch (e: Exception) {
-                Log.d(TAG, "getBooks: exception: ${e.message}")
+                e.printStackTrace()
             }
+        }
+    }
+
+
+private fun saveImageToGallery(
+    context: Context,
+    inputStream: java.io.InputStream,
+    fileName: String
+) {
+    val contentResolver = context.contentResolver
+    val outputStream: OutputStream?
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+            put(MediaStore.Images.Media.IS_PENDING, 1)
+        }
+
+        val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+        outputStream = uri?.let { contentResolver.openOutputStream(it) }
+
+        outputStream?.use { out ->
+            inputStream.copyTo(out)
         }
 
 
+        values.clear()
+        values.put(MediaStore.Images.Media.IS_PENDING, 0)
+        uri?.let { contentResolver.update(it, values, null, null) }
+    } else {
+        val picturesDir =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+        val file = File(picturesDir, fileName)
+        outputStream = FileOutputStream(file)
+
+        outputStream.use { out ->
+            inputStream.copyTo(out)
+        }
+
+
+        // Notify the gallery about the new image
+        context.sendBroadcast(
+            android.content.Intent(android.content.Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).apply {
+                data = android.net.Uri.fromFile(file)
+            }
+        )
     }
+}
 
+private fun getBooks() {
+    val bookResponse = mutableListOf<BookModel>()
 
-    private fun isOneDayLater(publishedAt: String): Boolean {
-        // Define the formatter for the input date string
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
-
-        // Parse the publishedAt string to ZonedDateTime
-        val publishedDateTime = ZonedDateTime.parse(publishedAt, formatter)
-
-        // Get the current time in the same zone (UTC in this case)
-        val currentTime = ZonedDateTime.now(ZoneId.of("UTC"))
-
-        // Calculate the difference in time
-        val duration = Duration.between(publishedDateTime, currentTime)
-
-        // Check if the difference is 24 hours or more
-        return duration.toHours() >= 24
-    }
-
-
-    private fun checkNewsDataUptoDate(db: FirebaseFirestore) {
-
-        val newsResponse = mutableListOf<NewsArticle>()
-
+    viewModelScope.launch(Dispatchers.IO) {
         try {
-            db.collection("news")
+            db.collection("book")
                 .get()
                 .addOnSuccessListener { result ->
                     for (document in result) {
-                        newsResponse.add(document.toObject(NewsArticle::class.java))
+                        bookResponse.add(document.toObject(BookModel::class.java))
                     }
-                    Log.d(TAG, "checkNewsDataUptoDate: $newsResponse")
+                    Log.d(TAG, "getBooks: $bookResponse")
                 }
                 .addOnFailureListener { exception ->
                     Log.w(TAG, "Error getting documents.", exception)
                 }.addOnCompleteListener {
 
-                    if (newsResponse.isNotEmpty()) {
-                        val publishedAt = newsResponse.first().publishedAt
-                        val isOneDayLater = isOneDayLater(publishedAt)
+                    if (bookResponse.isNotEmpty()) {
 
-                        println("Is one day later: $isOneDayLater")
-
-                        if (isOneDayLater) {
-                            viewModelScope.launch(Dispatchers.IO) {
-                                getNewsAndUploadToDB(db)
-                            }
-                        } else {
-                            news.value = newsResponse
-                        }
-
+                        books.value = bookResponse
 
                     }
 
                 }
         } catch (e: Exception) {
-            Log.d(TAG, "checkNewsDataUptoDate: exception: ${e.message}")
+            Log.d(TAG, "getBooks: exception: ${e.message}")
         }
-
-
     }
 
-    fun searchForImage() {
-        viewModelScope.launch {
-            try {
 
-                val response = RetrofitInstancePexels.apiPexels.getSearchPhotos(
-                    page = 1,
-                    perPage = 30,
-                    query = searchBarText.value
-                )
+}
 
-                curratedPhotos.value = response.photos
-                Log.d(TAG, "getCuratedPhotos: searchedPhotosSize" + curratedPhotos.value.size)
 
-                Log.d(TAG, "getCuratedPhotos: $response")
-            } catch (e: Exception) {
-                Log.d(TAG, "getCuratedPhotos: error " + e.message)
+private fun isOneDayLater(publishedAt: String): Boolean {
+    // Define the formatter for the input date string
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
+
+    // Parse the publishedAt string to ZonedDateTime
+    val publishedDateTime = ZonedDateTime.parse(publishedAt, formatter)
+
+    // Get the current time in the same zone (UTC in this case)
+    val currentTime = ZonedDateTime.now(ZoneId.of("UTC"))
+
+    // Calculate the difference in time
+    val duration = Duration.between(publishedDateTime, currentTime)
+
+    // Check if the difference is 24 hours or more
+    return duration.toHours() >= 24
+}
+
+
+private fun checkNewsDataUptoDate(db: FirebaseFirestore) {
+
+    val newsResponse = mutableListOf<NewsArticle>()
+
+    try {
+        db.collection("news")
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    newsResponse.add(document.toObject(NewsArticle::class.java))
+                }
+                Log.d(TAG, "checkNewsDataUptoDate: $newsResponse")
             }
-        }
+            .addOnFailureListener { exception ->
+                Log.w(TAG, "Error getting documents.", exception)
+            }.addOnCompleteListener {
 
-    }
+                if (newsResponse.isNotEmpty()) {
+                    val publishedAt = newsResponse.first().publishedAt
+                    val isOneDayLater = isOneDayLater(publishedAt)
 
+                    println("Is one day later: $isOneDayLater")
 
-    fun getNewsAndUploadToDB(db: FirebaseFirestore) {
-
-        viewModelScope.launch {
-            try {
-                val response = RetrofitInstanceNews.apiNews.getNews(
-                    languages = "en",
-                    limit = 100
-                )
-
-                response.data.forEach {
-                    db.collection("news")
-                        .add(it)
-                        .addOnSuccessListener { documentReference ->
-                            Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+                    if (isOneDayLater) {
+                        viewModelScope.launch(Dispatchers.IO) {
+                            getNewsAndUploadToDB(db)
                         }
-                        .addOnFailureListener { e ->
-                            Log.w(TAG, "Error adding document: " + e.message, e)
-                        }
+                    } else {
+                        news.value = newsResponse
+                    }
+
+
                 }
 
-                news.value = response.data
-
-
-                Log.d(TAG, "getNews: $response")
-            } catch (e: Exception) {
-                Log.d(TAG, "getNews: error" + e.message)
             }
-        }
-
-
+    } catch (e: Exception) {
+        Log.d(TAG, "checkNewsDataUptoDate: exception: ${e.message}")
     }
 
 
-    private fun getDogFacts() {
-        viewModelScope.launch {
-            try {
-                val response = RetrofitInstancesDogFacts.apiDog.getDogFacts(5)
+}
 
-                // Create a new mutable list from the current state
-                val updatedList = dogFacts.value.toMutableList()
+fun searchForImage() {
+    viewModelScope.launch {
+        try {
 
-                // Add new facts to the list
-                response.data.forEach {
+            val response = RetrofitInstancePexels.apiPexels.getSearchPhotos(
+                page = 1,
+                perPage = 30,
+                query = searchBarText.value
+            )
+
+            curratedPhotos.value = response.photos
+            Log.d(TAG, "getCuratedPhotos: searchedPhotosSize" + curratedPhotos.value.size)
+
+            Log.d(TAG, "getCuratedPhotos: $response")
+        } catch (e: Exception) {
+            Log.d(TAG, "getCuratedPhotos: error " + e.message)
+        }
+    }
+
+}
+
+
+fun getNewsAndUploadToDB(db: FirebaseFirestore) {
+
+    viewModelScope.launch {
+        try {
+            val response = RetrofitInstanceNews.apiNews.getNews(
+                languages = "en",
+                limit = 100
+            )
+
+            response.data.forEach {
+                db.collection("news")
+                    .add(it)
+                    .addOnSuccessListener { documentReference ->
+                        Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w(TAG, "Error adding document: " + e.message, e)
+                    }
+            }
+
+            news.value = response.data
+
+
+            Log.d(TAG, "getNews: $response")
+        } catch (e: Exception) {
+            Log.d(TAG, "getNews: error" + e.message)
+        }
+    }
+
+
+}
+
+
+private fun getDogFacts() {
+    viewModelScope.launch {
+        try {
+            val response = RetrofitInstancesDogFacts.apiDog.getDogFacts(5)
+
+            // Create a new mutable list from the current state
+            val updatedList = dogFacts.value.toMutableList()
+
+            // Add new facts to the list
+            response.data.forEach {
+                updatedList.add(it)
+            }
+
+            // Assign the updated list back to dogFacts.value
+            dogFacts.value = updatedList
+
+            Log.d(TAG, "getDogFacts: ${response}")
+            Log.d(TAG, "getDogFacts: ${dogFacts.value}")
+
+        } catch (e: Exception) {
+            Log.d(TAG, "getDogFacts: error" + e.message)
+        }
+    }
+
+}
+
+
+private fun getCatFacts() {
+
+    viewModelScope.launch {
+        try {
+            val response = RetrofitInstancesCatFacts.apiCat.getCatFacts(100)
+
+            val updatedList = catFacts.value.toMutableList()
+
+            response.forEach {
+                if (it.status.verified == true) {
                     updatedList.add(it)
                 }
-
-                // Assign the updated list back to dogFacts.value
-                dogFacts.value = updatedList
-
-                Log.d(TAG, "getDogFacts: ${response}")
-                Log.d(TAG, "getDogFacts: ${dogFacts.value}")
-
-            } catch (e: Exception) {
-                Log.d(TAG, "getDogFacts: error" + e.message)
             }
-        }
 
+            catFacts.value = updatedList
+
+            Log.d(TAG, "getCatFacts: ${catFacts.value} ")
+            Log.d(TAG, "getCatFacts: ${catFacts.value.size} ")
+        } catch (e: Exception) {
+            Log.d(TAG, "getCatFacts: error: ${e.message}")
+        }
+    }
+
+}
+
+
+fun getWeather(lat: Double, lon: Double) {
+
+    viewModelScope.launch {
+        try {
+            weatherResponse.value = RetrofitInstanceWeather.apiWeather.getWeatherData(
+                lat = lat,
+                lon = lon,
+                units = "metric"
+            )
+
+            Log.d(TAG, "getWeather: $weatherResponse")
+        } catch (e: Exception) {
+            Log.d(TAG, "getWeather: error" + e.message)
+        }
     }
 
 
-    private fun getCatFacts() {
+}
 
-        viewModelScope.launch {
-            try {
-                val response = RetrofitInstancesCatFacts.apiCat.getCatFacts(100)
 
-                val updatedList = catFacts.value.toMutableList()
+fun getCuratedPhotos() {
+    viewModelScope.launch {
+        try {
 
-                response.forEach {
-                    if (it.status.verified == true) {
-                        updatedList.add(it)
-                    }
-                }
+            val response = RetrofitInstancePexels.apiPexels.getCuratedPhotos(
+                page = 1,
+                perPage = 30,
+            )
 
-                catFacts.value = updatedList
+            curratedPhotos.value = response.photos
+            Log.d(TAG, "getCuratedPhotos: curratedPhotosSize" + curratedPhotos.value.size)
 
-                Log.d(TAG, "getCatFacts: ${catFacts.value} ")
-                Log.d(TAG, "getCatFacts: ${catFacts.value.size} ")
-            } catch (e: Exception) {
-                Log.d(TAG, "getCatFacts: error: ${e.message}")
-            }
+            Log.d(TAG, "getCuratedPhotos: $response")
+        } catch (e: Exception) {
+            Log.d(TAG, "getCuratedPhotos: error " + e.message)
         }
-
     }
 
-
-     fun getWeather(lat: Double, lon: Double) {
-
-        viewModelScope.launch {
-            try {
-                weatherResponse.value = RetrofitInstanceWeather.apiWeather.getWeatherData(
-                    lat = lat,
-                    lon = lon,
-                    units = "metric"
-                )
-
-                Log.d(TAG, "getWeather: $weatherResponse")
-            } catch (e: Exception) {
-                Log.d(TAG, "getWeather: error" + e.message)
-            }
-        }
-
-
-    }
-
-
-    fun getCuratedPhotos() {
-        viewModelScope.launch {
-            try {
-
-                val response = RetrofitInstancePexels.apiPexels.getCuratedPhotos(
-                    page = 1,
-                    perPage = 30,
-                )
-
-                curratedPhotos.value = response.photos
-                Log.d(TAG, "getCuratedPhotos: curratedPhotosSize" + curratedPhotos.value.size)
-
-                Log.d(TAG, "getCuratedPhotos: $response")
-            } catch (e: Exception) {
-                Log.d(TAG, "getCuratedPhotos: error " + e.message)
-            }
-        }
-
-    }
+}
 
 
 }
