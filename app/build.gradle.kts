@@ -120,6 +120,8 @@ dependencies {
 
     implementation ("com.google.accompanist:accompanist-permissions:0.32.0")
 
+    implementation ("com.google.accompanist:accompanist-webview:0.36.0")
+
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
 
 

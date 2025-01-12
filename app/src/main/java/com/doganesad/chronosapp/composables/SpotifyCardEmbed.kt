@@ -50,12 +50,15 @@ fun CustomHtmlWebView(modifier: Modifier = Modifier,innerHeight: String = "220px
     DisposableEffect(Unit) {
         // Cleanup the WebView when the composable is removed
         onDispose {
-            webView.stopLoading()
-            webView.clearHistory()
-            webView.clearCache(true)
-            webView.loadUrl("about:blank")
-            webView.removeAllViews()
-            webView.destroy()
+
+            // TODO: Buradaki bug coz 
+            
+//            webView.stopLoading()
+//            webView.clearHistory()
+//            webView.clearCache(true)
+//            webView.loadUrl("about:blank")
+//            webView.removeAllViews()
+//            webView.destroy()
         }
     }
 
