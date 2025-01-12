@@ -9,3 +9,4 @@ Chronos App Android Kotlin With Jetpack Compose
 ![Screenshot_20250112_190748](https://github.com/user-attachments/assets/eceab93e-0c93-4337-bd7f-077594367bde)
 ![Screenshot_20250112_190859](https://github.com/user-attachments/assets/26430013-07e2-49db-897e-3f1850698cb4)
 ![Screenshot_20250112_190921](https://github.com/user-attachments/assets/628aabcb-885d-4115-a241-4e12489a2957)
+![image](https://github.com/user-attachments/assets/80027abf-ceed-4d05-89b1-ff0276cdeb11)
